@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="robots" content="noindex">
-<title>單字練習_雙向翻牌</title>
+<title>單字練習_雙向翻牌 (AI修復版)</title>
 <style>
 :root {
   --bg: #f0f2f5;
   --card-bg: #ffffff;
-  --accent: #3182ce; /* 藍色主調 */
+  --accent: #3182ce;
   --accent-hover: #2b6cb0;
   --text-main: #2d3748;
   --text-sub: #718096;
@@ -115,24 +115,55 @@ body {
   margin-top: 8px;
 }
 
-/* 發音按鈕 */
-.speak-btn {
-  background: none;
+/* 發音與AI按鈕容器 */
+.action-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* 功能小按鈕 (發音/AI) */
+.icon-btn {
+  background: #edf2f7;
   border: none;
   cursor: pointer;
   color: var(--text-sub);
-  padding: 8px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s, background 0.2s;
-  margin-left: 8px;
-  vertical-align: middle;
+  transition: all 0.2s;
 }
-.speak-btn:hover { background: #edf2f7; color: var(--accent); }
-.speak-btn svg { width: 24px; height: 24px; fill: currentColor; }
+.icon-btn:hover { background: #e2e8f0; color: var(--accent); transform: scale(1.05); }
+.icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
 .hidden { display: none !important; }
+
+/* AI 彈出視窗 (Dialog) */
+dialog {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  background: #fff;
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+.dialog-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+}
+.dialog-title { font-weight: 700; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+.close-dialog-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #a0aec0; line-height: 1; }
+.dialog-content { padding: 20px; line-height: 1.6; color: #4a5568; font-size: 1rem; white-space: pre-wrap; }
 
 /* 控制按鈕群 */
 .controls {
@@ -246,10 +277,16 @@ iframe {
 
     <div class="display-area">
       <div id="mainText" class="word-text">按「下一題」開始</div>
-      <button id="speakBtn" class="speak-btn hidden" aria-label="發音">
-        <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-      </button>
       
+      <div class="action-btns">
+        <button id="speakBtn" class="icon-btn hidden" aria-label="發音">
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        </button>
+        <button id="aiBtn" class="icon-btn hidden" aria-label="AI 解釋">
+          <svg viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A2.5 2.5 0 0 0 5 15.5A2.5 2.5 0 0 0 7.5 18a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 7.5 13m9 0a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5"/></svg>
+        </button>
+      </div>
+
       <div id="subText" class="sub-text"></div>
       <div id="hint" class="hint-text"></div>
     </div>
@@ -277,7 +314,7 @@ iframe {
         ▼ 展開/隱藏 Google 試算表 (預覽與編輯)
       </button>
       <a href="https://docs.google.com/spreadsheets/d/16y8_QTo0QrQe5El9ylVvps94mhNi7zRuErIrxRkwoQc/edit?usp=sharing" target="_blank" class="btn btn-secondary" style="padding:10px; font-size:0.9rem; text-decoration:none; display:flex; align-items:center; justify-content:center;">
-        ↗ 開啟試算表
+        ↗ 開啟原始檔
       </a>
     </div>
     
@@ -289,109 +326,121 @@ iframe {
       * 若要編輯，請直接在下方表格操作（變更會自動儲存到 Google Sheet，請重新匯入以更新題庫）。
     </small>
   </div>
-
 </div>
+
+<dialog id="aiModal">
+  <div class="dialog-header">
+    <div class="dialog-title">
+      <svg style="width:20px;height:20px;fill:#3182ce;margin-right:6px" viewBox="0 0 24 24"><path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2"/></svg>
+      AI 老師講解
+    </div>
+    <button id="closeModalBtn" class="close-dialog-btn">&times;</button>
+  </div>
+  <div class="dialog-content" id="aiContent">思考中...</div>
+</dialog>
 
 <script>
 /* ==================================================
-   ★ 設定區：更新後的 ID
+   ★ 設定區：ID & API Key
    ================================================== */
 const SHEET_ID = "16y8_QTo0QrQe5El9ylVvps94mhNi7zRuErIrxRkwoQc"; 
+
+// ★ 請在此處填入您的 API Key
+const GEMINI_API_KEY = "AIzaSyDckr865qsLflzmEEkGWlXbN03beT3OnbE"; 
+
+// ★ 模型名稱：這裡預設用 1.5-flash (目前最穩定的)，如果您測試 2.5 可行也可改
+const MODEL_NAME = "gemini-2.5-flash";
 
 // 初始化 Iframe
 const sheetFrame = document.getElementById("sheetFrame");
 sheetFrame.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit?rm=minimal`;
 
 /* ================= 變數宣告 ================= */
-let pairs = [];        // 單字庫
-let current = null;    // 目前的題目物件
-let mode = 0;          // 0:隨機, 1:中>英, 2:英>中, 3:依序瀏覽
-let seqIndex = 0;      // 順序模式的指標
+let pairs = [];        
+let current = null;    
+let mode = 0;          
+let seqIndex = 0;      
 
 // DOM 元素
 const mainTextEl = document.getElementById("mainText");
 const subTextEl = document.getElementById("subText");
 const hintEl = document.getElementById("hint");
 const speakBtn = document.getElementById("speakBtn");
+const aiBtn = document.getElementById("aiBtn");
 const showBtn = document.getElementById("showBtn");
 const nextBtn = document.getElementById("nextBtn");
 const textArea = document.getElementById("pairs");
 const statusMsg = document.getElementById("statusMsg");
 const toggleSheetBtn = document.getElementById("toggleSheetBtn");
 const sheetContainer = document.getElementById("sheetContainer");
+// Modal Elements
+const aiModal = document.getElementById("aiModal");
+const aiContent = document.getElementById("aiContent");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
 /* ================= 核心邏輯 ================= */
 
-// 1. 下一題 (Next)
 function nextCard() {
   if (!pairs.length) {
     current = null;
     render();
     return;
   }
-
-  // 模式 3: 依序瀏覽
   if (mode === 3) {
     if (seqIndex >= pairs.length) seqIndex = 0; 
     const p = pairs[seqIndex];
     current = { p: p, d: 3 }; 
     seqIndex++; 
-  } 
-  // 其他模式: 隨機
-  else {
+  } else {
     const p = pairs[Math.floor(Math.random() * pairs.length)];
     let d = 0;
     if (mode === 0) d = Math.random() < 0.5 ? 0 : 1;
-    else if (mode === 1) d = 1; // 中->英
-    else d = 0; // 英->中
+    else if (mode === 1) d = 1; 
+    else d = 0; 
     current = { p, d };
   }
-
   render();
 }
 
-// 2. 上一題 (Previous) - 僅用於模式3
 function prevCard() {
   if (!pairs.length) return;
-  
   if (mode === 3) {
     seqIndex -= 2;
-    if (seqIndex < 0) {
-        seqIndex = pairs.length + seqIndex; 
-    }
+    if (seqIndex < 0) seqIndex = pairs.length + seqIndex; 
     if (seqIndex < 0) seqIndex = 0;
-
     const p = pairs[seqIndex];
     current = { p: p, d: 3 };
     seqIndex++; 
-    
     render();
   }
 }
 
-// 3. 渲染畫面
 function render() {
-  // 重置狀態
   subTextEl.textContent = ""; 
   speakBtn.classList.add("hidden");
+  aiBtn.classList.add("hidden"); 
 
-  // 只要有題目，一律顯示發音按鈕 (不論模式)
+  // 只要有題目，顯示發音和 AI 按鈕
   if (current) {
     speakBtn.classList.remove("hidden");
     speakBtn.onclick = (e) => {
-        e.stopPropagation(); // 防止觸發卡片其他點擊事件
-        speak(current.p.en); // 固定讀取英文部分
+        e.stopPropagation(); 
+        speak(current.p.en); 
+    };
+
+    aiBtn.classList.remove("hidden");
+    aiBtn.onclick = (e) => {
+        e.stopPropagation();
+        askGemini(current.p.en);
     };
   }
 
-  // 按鈕文字處理
   if (mode === 3) {
       showBtn.textContent = "上一題";
       nextBtn.textContent = "下一題";
   } else {
       if (current && current.d === 0) showBtn.textContent = "顯示中文";
       else showBtn.textContent = "顯示英文";
-      
       nextBtn.textContent = "下一題";
   }
 
@@ -405,40 +454,28 @@ function render() {
 
   showBtn.disabled = false;
 
-  // 依據模式顯示內容
   if (mode === 3) {
     mainTextEl.textContent = current.p.zh;
     subTextEl.textContent = current.p.en;
     hintEl.textContent = `順序瀏覽: ${seqIndex} / ${pairs.length}`;
-
   } else if (current.d === 0) {
-    // 英 -> 中
     mainTextEl.textContent = current.p.en;
     hintEl.textContent = "英文 → 中文";
     showBtn.textContent = "顯示中文";
-
   } else {
-    // 中 -> 英
     mainTextEl.textContent = current.p.zh;
     hintEl.textContent = "中文 → 英文";
     showBtn.textContent = "顯示英文";
   }
 }
 
-// 4. 顯示答案 (翻牌) - 僅用於模式 0, 1, 2
 function showAnswer() {
   if (!current) return;
-  
-  if (current.d === 0) {
-    subTextEl.textContent = current.p.zh;
-  } else {
-    subTextEl.textContent = current.p.en;
-  }
-  
+  if (current.d === 0) subTextEl.textContent = current.p.zh;
+  else subTextEl.textContent = current.p.en;
   showBtn.textContent = "隱藏翻譯";
 }
 
-// 5. 隱藏答案
 function hideAnswer() {
   subTextEl.textContent = "";
   if (current.d === 0) showBtn.textContent = "顯示中文";
@@ -453,6 +490,57 @@ function speak(text) {
   utterance.rate = 0.9;     
   window.speechSynthesis.speak(utterance);
 }
+
+/* ================= AI Gemini 功能 (使用您驗證過的邏輯) ================= */
+async function askGemini(word) {
+    if(!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        alert("請先在程式碼中設定您的 Gemini API Key");
+        return;
+    }
+
+    aiModal.showModal();
+    aiContent.textContent = "AI 老師正在思考中...";
+    
+    const promptText = `請解釋英文單字 "${word}" 的中文意思，詞性，近似詞，返義詞，用法，並提供一個簡單的英文例句附帶中文翻譯。請用繁體中文回答。`;
+
+    // 使用您測試成功的 URL 結構
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: promptText }] }]
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.error) {
+             console.error("API Error:", data.error);
+             throw new Error(data.error.message);
+        }
+
+        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+            throw new Error("AI 回傳內容為空");
+        }
+
+        let text = data.candidates[0].content.parts[0].text;
+        text = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+        aiContent.innerHTML = text;
+
+    } catch (error) {
+        console.error("Gemini Fetch Error:", error);
+        aiContent.textContent = "發生錯誤：" + error.message;
+    }
+}
+
+// 關閉 Modal
+closeModalBtn.onclick = () => aiModal.close();
+aiModal.addEventListener('click', (event) => {
+    if (event.target === aiModal) aiModal.close();
+});
 
 /* ================= 工具函式 ================= */
 function safeSplitLines(text) { return text.split(/\r?\n/).filter(x => x.trim()); }
@@ -483,20 +571,16 @@ function parsePairs(text) {
 async function importSheet() {
   statusMsg.textContent = "載入中...";
   statusMsg.style.color = "var(--accent)";
-  
   const sheetName = document.getElementById("sheetNameInput").value.trim();
   let url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
   if (sheetName) url += `&sheet=${encodeURIComponent(sheetName)}`;
-
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error("連線錯誤");
     let csv = await res.text();
     if (csv.trim().startsWith("<!doctype")) throw new Error("權限不足或工作表名稱錯誤");
-
     let lines = safeSplitLines(csv);
     let newLinesText = [];
-    
     for (let L of lines) {
       let cleanL = L.replace(/""/g, '"');
       let parts = cleanL.split(",");
@@ -505,56 +589,31 @@ async function importSheet() {
       let c2 = parts[1].replace(/^"|"$/g, '').trim();
       if (c1 && c2) newLinesText.push(`${c1} - ${c2}`);
     }
-
     if (!newLinesText.length) throw new Error("無資料");
-
     let newPairs = parsePairs(newLinesText.join("\n"));
     pairs = pairs.concat(newPairs); 
-    
     textArea.value = pairs.map(p => `${p.zh} - ${p.en}`).join("\n");
     statusMsg.textContent = `成功加入 ${newPairs.length} 筆 (共 ${pairs.length} 筆)`;
     statusMsg.style.color = "green";
-
     if (!current) nextCard();
-
   } catch (e) {
     console.error(e);
     statusMsg.textContent = "失敗: " + e.message;
     statusMsg.style.color = "red";
-    alert("匯入失敗，請檢查工作表名稱是否正確。");
+    alert("匯入失敗，請檢查工作表名稱是否正確 (且權限為公開)。");
   }
 }
 
 /* ================= 事件綁定 ================= */
 document.getElementById("importBtn").onclick = importSheet;
 document.getElementById("clearBtn").onclick = () => {
-  pairs = [];
-  current = null;
-  seqIndex = 0;
-  textArea.value = "";
-  render();
-  statusMsg.textContent = "已清空";
+  pairs = []; current = null; seqIndex = 0; textArea.value = ""; render(); statusMsg.textContent = "已清空";
 };
-
 nextBtn.onclick = nextCard;
-
-// 按鈕邏輯：根據模式決定行為
 showBtn.onclick = () => {
-  // 模式 3: 上一題
-  if (mode === 3) {
-    prevCard();
-    return;
-  }
-
-  // 其他模式: 顯示/隱藏
-  if (subTextEl.textContent.trim() === "") {
-    showAnswer();
-  } else {
-    hideAnswer();
-  }
+  if (mode === 3) { prevCard(); return; }
+  if (subTextEl.textContent.trim() === "") showAnswer(); else hideAnswer();
 };
-
-// Iframe 展開/隱藏
 toggleSheetBtn.onclick = () => {
   if (sheetContainer.style.display === 'block') {
     sheetContainer.style.display = 'none';
@@ -564,29 +623,18 @@ toggleSheetBtn.onclick = () => {
     toggleSheetBtn.textContent = '▲ 收起 Google 試算表';
   }
 };
-
-// 模式切換
 const modeBtns = ["m0", "m1", "m2", "m3"];
 modeBtns.forEach((id, index) => {
   document.getElementById(id).onclick = () => {
     mode = index;
     if (mode === 3) seqIndex = 0;
-    
-    modeBtns.forEach((x, j) => {
-      document.getElementById(x).classList.toggle("active", j === index);
-    });
-    
+    modeBtns.forEach((x, j) => document.getElementById(x).classList.toggle("active", j === index));
     nextCard();
   };
 });
-
-// 手動編輯監聽
 textArea.addEventListener('input', () => {
-  const text = textArea.value;
-  pairs = parsePairs(text);
-  statusMsg.textContent = `手動更新: ${pairs.length} 筆`;
+  const text = textArea.value; pairs = parsePairs(text); statusMsg.textContent = `手動更新: ${pairs.length} 筆`;
 });
-
 </script>
 </body>
 </html>
